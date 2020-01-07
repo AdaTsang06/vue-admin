@@ -71,10 +71,10 @@
       let that = this;
       this.$ws.AddFunc({
         fName: LOGIN_REQ,
-        f({ result, comment }) {
+        f({ result, comment, ...user }) {
           that.logining = false;
           if(result === 0) {
-            // sessionStorage.setItem('user', JSON.stringify())
+            sessionStorage.setItem('user', JSON.stringify(Object.assign(that.ruleForm2, user)));
             that.$router.push({ path: '/assetList' })
           } else {
             that.$message({

@@ -106,30 +106,35 @@
 			},
 			//退出登录
 			logout: function () {
-				var _this = this;
+				const { LOGOUT_REQ } = this;
+				let that = this;
+				const user = JSON.parse(sessionStorage.getItem('user'));
 				this.$confirm('确认退出吗?', '提示', {
 					//type: 'warning'
 				}).then(() => {
-					sessionStorage.removeItem('user');
-					_this.$router.push('/login');
+					let logout_param = {
+						method: LOGOUT_REQ,
+						name: user.name,
+						token: user.token,
+						seq: that.$getRandom()
+					}
+					that.$ws.Call(LOGOUT_REQ, logout_param);
 				}).catch(() => {
 
 				});
-
-
 			},
 			//折叠导航栏
 			collapse:function(){
 				this.collapsed=!this.collapsed;
-				console.log(this.collapsed,'collapsed')
 			},
 			showMenu(i,status){
 				this.$refs.menuCollapsed.getElementsByClassName('submenu-hook-'+i)[0].style.display=status?'block':'none';
 			}
 		},
 		mounted() {
+			const { LOGOUT_REQ } = this;
 			let that = this;
-			var user = sessionStorage.getItem('user');
+			let user = sessionStorage.getItem('user');
 			if (user) {
 				user = JSON.parse(user);
 				this.sysUserName = user.name || '';
@@ -137,9 +142,10 @@
 			}
 
 			this.$ws.AddFunc({
-				fName: '',
-				f() {
-
+				fName: LOGOUT_REQ,
+				f({ result }) {
+					sessionStorage.removeItem('user');
+					return that.$router.push('/login');
 				}
 			})
 		}
