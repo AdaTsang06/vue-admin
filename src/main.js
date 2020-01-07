@@ -11,13 +11,18 @@ import Vuex from 'vuex'
 //import 'nprogress/nprogress.css'
 import routes from './routes'
 import Mock from './mock'
-Mock.bootstrap();
+// Mock.bootstrap();
 import 'font-awesome/css/font-awesome.min.css'
+import {WebSocketPlugin} from '@/plugins/websocket';
+const testServer = 'wss://3x9r4af6h6.execute-api.ap-east-1.amazonaws.com/dev';
+Vue.use(WebSocketPlugin, [testServer]);
+Vue.use(ElementUI);
+Vue.use(VueRouter);
+Vue.use(Vuex);
 
-Vue.use(ElementUI)
-Vue.use(VueRouter)
-Vue.use(Vuex)
-
+Vue.prototype.$getRandom = function () {
+  return String(Math.random() * 1000 + new Date().getTime());
+}
 //NProgress.configure({ showSpinner: false });
 
 const router = new VueRouter({

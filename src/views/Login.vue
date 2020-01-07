@@ -10,21 +10,19 @@
     <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
     <el-form-item style="width:100%;">
       <el-button type="primary" style="width:100%;" @click.native.prevent="handleSubmit2" :loading="logining">登录</el-button>
-      <!--<el-button @click.native.prevent="handleReset2">重置</el-button>-->
     </el-form-item>
   </el-form>
 </template>
 
 <script>
   import { requestLogin } from '../api/api';
-  //import NProgress from 'nprogress'
   export default {
     data() {
       return {
         logining: false,
         ruleForm2: {
           account: 'admin',
-          checkPass: '123456'
+          checkPass: ''
         },
         rules2: {
           account: [
@@ -36,7 +34,9 @@
             //{ validator: validaePass2 }
           ]
         },
-        checked: true
+        checked: true,
+
+        LOGIN_REQ: 'login'
       };
     },
     methods: {
@@ -44,33 +44,46 @@
         this.$refs.ruleForm2.resetFields();
       },
       handleSubmit2(ev) {
-        var _this = this;
+        const { LOGIN_REQ } = this;
+        let that = this;
         this.$refs.ruleForm2.validate((valid) => {
           if (valid) {
-            //_this.$router.replace('/table');
             this.logining = true;
-            //NProgress.start();
-            var loginParams = { username: this.ruleForm2.account, password: this.ruleForm2.checkPass };
-            requestLogin(loginParams).then(data => {
-              this.logining = false;
-              //NProgress.done();
-              let { msg, code, user } = data;
-              if (code !== 200) {
-                this.$message({
-                  message: msg,
-                  type: 'error'
-                });
-              } else {
-                sessionStorage.setItem('user', JSON.stringify(user));
-                this.$router.push({ path: '/table' });
-              }
-            });
+            var loginParams = {
+              method: LOGIN_REQ,
+              data: {
+                name: that.ruleForm2.account,
+                password: that.ruleForm2.checkPass,
+                client_type: 2,
+                nonce: that.$getRandom()
+              },
+            };
+            this.$ws.Call(LOGIN_REQ,loginParams);
           } else {
             console.log('error submit!!');
             return false;
           }
         });
       }
+    },
+    mounted() {
+      const { LOGIN_REQ } = this;
+      let that = this;
+      this.$ws.AddFunc({
+        fName: LOGIN_REQ,
+        f({ result, comment }) {
+          that.logining = false;
+          if(result === 0) {
+            // sessionStorage.setItem('user', JSON.stringify())
+            that.$router.push({ path: '/assetList' })
+          } else {
+            that.$message({
+              message: comment,
+              type: 'error'
+            });
+          }
+        }
+      })
     }
   }
 
